@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrackGirlies - Period Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, beige, #d2b48c);
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    header {
+      background-color: #8b5e3c;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-size: 2em;
+    }
+    nav {
+      background-color: #deb887;
+      padding: 10px;
+      text-align: center;
+    }
+    nav a {
+      margin: 0 15px;
+      color: #333;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .container {
+      padding: 20px;
+      max-width: 1000px;
+      margin: auto;
+    }
+    h2 {
+      color: #8b5e3c;
+      margin-bottom: 10px;
+    }
+    input, button, select {
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #8b5e3c;
+      border-radius: 5px;
+    }
+    button {
+      background-color: #8b5e3c;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #a97456;
+    }
+    .facts, .quotes {
+      background-color: #f5f5dc;
+      border-left: 5px solid #8b5e3c;
+      padding: 10px;
+      margin: 15px 0;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 20px 0;
+    }
+    table, th, td {
+      border: 1px solid #8b5e3c;
+      text-align: center;
+      padding: 10px;
+    }
+    .highlight {
+      background-color: #ffb6c1;
+    }
+    footer {
+      text-align: center;
+      padding: 20px;
+      background-color: #deb887;
+      margin-top: 20px;
+    }
+    canvas {
+      margin-top: 20px;
+      border: 1px solid #8b5e3c;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  </style>
+</head>
+<body>
+  <header>🌸 TrackGirlies - Period Tracker 🌸</header>
+  <nav>
+    <a href="#home">Home</a>
+    <a href="#tracker">Period Tracker</a>
+    <a href="#pain-relief">Pain Relief Tips</a>
+    <a href="#calendar">Calendar</a>
+    <a href="#graph">Graph</a>
+  </nav>
+
+  <div class="container" id="home">
+    <h2>Welcome to TrackGirlies 💕</h2>
+    <p>Track your cycle, record moods, and get motivated with facts and quotes!</p>
+  </div>
+
+  <div class="container" id="tracker">
+    <h2>📅 Enter Your Period Dates</h2>
+    <label>Start Date:</label>
+    <input type="date" id="startDate">
+    <br>
+    <label>End Date:</label>
+    <input type="date" id="endDate">
+    <br>
+    <button onclick="savePeriod()">Save</button>
+  </div>
+
+  <div class="container" id="pain-relief">
+    <h2>💡 10 Best Ways to Ease Pain</h2>
+    <ul>
+      <li>Use a heating pad</li>
+      <li>Drink herbal tea</li>
+      <li>Exercise lightly</li>
+      <li>Massage lower abdomen</li>
+      <li>Take a warm bath</li>
+      <li>Stay hydrated</li>
+      <li>Eat magnesium-rich foods</li>
+      <li>Do yoga stretches</li>
+      <li>Get enough sleep</li>
+      <li>Listen to calming music</li>
+    </ul>
+  </div>
+
+  <div class="container" id="calendar">
+    <h2>📆 Your Period Calendar</h2>
+    <table id="calendarTable"></table>
+  </div>
+
+  <div class="container" id="graph">
+    <h2>📊 Period Length Graph</h2>
+    <!-- fixed sharp graph -->
+    <canvas id="graphCanvas" width="800" height="400"></canvas>
+  </div>
+
+  <div class="container">
+    <h2>😊 Mood Tracker</h2>
+    <select id="mood">
+      <option>Happy 😀</option>
+      <option>Sad 😔</option>
+      <option>Angry 😡</option>
+      <option>Calm 😌</option>
+      <option>Tired 😴</option>
+    </select>
+    <button onclick="saveMood()">Save Mood</button>
+  </div>
+
+  <div class="container facts">
+    🌟 Fun Fact: The average menstrual cycle is 28 days!
+  </div>
+
+  <div class="container quotes">
+    💖 Quote: "Taking care of yourself is part of the journey!"
+  </div>
+
+  <footer>
+    © SriSingh 2025 - TrackGirlies. All Rights Reserved.
+  </footer>
+
+  <script>
+    let periods = [];
+    let monthlyData = {};
+
+    function savePeriod() {
+      let start = document.getElementById("startDate").value;
+      let end = document.getElementById("endDate").value;
+      if (!start || !end) {
+        alert("Please enter both start and end dates.");
+        return;
+      }
+
+      let startDate = new Date(start);
+      let endDate = new Date(end);
+      let diff = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+
+      let month = startDate.toLocaleString('default', { month: 'short' });
+      monthlyData[month] = diff;
+
+      periods.push({ start: startDate, end: endDate });
+      drawCalendar(startDate, endDate);
+      drawGraph();
+    }
+
+    function drawCalendar(startDate, endDate) {
+      let table = document.getElementById("calendarTable");
+      table.innerHTML = "";
+      let year = startDate.getFullYear();
+      let month = startDate.getMonth();
+
+      let firstDay = new Date(year, month, 1);
+      let lastDay = new Date(year, month + 1, 0);
+      let daysInMonth = lastDay.getDate();
+
+      let headerRow = "<tr>";
+      let days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      for (let d of days) headerRow += "<th>" + d + "</th>";
+      headerRow += "</tr>";
+      table.innerHTML += headerRow;
+
+      let row = "<tr>";
+      for (let i = 0; i < firstDay.getDay(); i++) {
+        row += "<td></td>";
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        let current = new Date(year, month, day);
+        let highlight = current >= startDate && current <= endDate ? "highlight" : "";
+        row += `<td class="${highlight}">${day}</td>`;
+        if ((current.getDay() + 1) % 7 === 0) {
+          row += "</tr><tr>";
+        }
+      }
+      row += "</tr>";
+      table.innerHTML += row;
+    }
+
+    function drawGraph() {
+      let canvas = document.getElementById("graphCanvas");
+      let ctx = canvas.getContext("2d");
+
+      // fix blur by scaling with DPR
+      let dpr = window.devicePixelRatio || 1;
+      let styleWidth = 800;
+      let styleHeight = 400;
+      canvas.width = styleWidth * dpr;
+      canvas.height = styleHeight * dpr;
+      canvas.style.width = styleWidth + "px";
+      canvas.style.height = styleHeight + "px";
+      ctx.scale(dpr, dpr);
+
+      ctx.clearRect(0, 0, styleWidth, styleHeight);
+
+      let months = Object.keys(monthlyData);
+      let values = Object.values(monthlyData);
+
+      if (months.length === 0) return;
+
+      let max = Math.max(...values, 10);
+      let barWidth = 50;
+      let gap = 30;
+      let chartHeight = 300;
+      let baseY = 350;
+
+      months.forEach((month, i) => {
+        let barHeight = (values[i] / max) * chartHeight;
+        ctx.fillStyle = "#8b5e3c";
+        ctx.fillRect(i * (barWidth + gap) + 60, baseY - barHeight, barWidth, barHeight);
+
+        ctx.fillStyle = "#000";
+        ctx.font = "14px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(month, i * (barWidth + gap) + 60 + barWidth / 2, baseY + 20);
+        ctx.fillText(values[i] + "d", i * (barWidth + gap) + 60 + barWidth / 2, baseY - barHeight - 10);
+      });
+    }
+
+    function saveMood() {
+      let mood = document.getElementById("mood").value;
+      alert("Mood saved: " + mood);
+    }
+  </script>
+</body>
+</html>
